@@ -4,11 +4,19 @@ import pandas as pd
 import joblib
 from spellchecker import SpellChecker
 spell = SpellChecker()
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 
 model = joblib.load("model/phishguard_model.pkl")
 vectorizer = joblib.load("model/vectorizer.pkl")
+
+
+DOMAIN_WHITELIST = {
+    "upi", "kyc", "sbi", "irctc", "aadhaar",
+    "pan", "sms", "otp", "bank", "rs"
+}
+spell.word_frequency.load_words(DOMAIN_WHITELIST)
 
 # =========================
 # EXPLAIN FUNCTION
@@ -40,7 +48,11 @@ def analyze_message(message):
     message_lower = message.lower()
     # Spelling anomaly detection
     words = [w for w in message_lower.split() if w.isalpha()]
-    misspelled = spell.unknown(words)
+    misspelled = {
+        w for w in spell.unknown(words)
+        if w not in DOMAIN_WHITELIST
+    }
+
 
     spelling_error_rate = len(misspelled) / max(len(words), 1)
 
