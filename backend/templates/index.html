@@ -64,6 +64,47 @@
 </head>
 
 <body>
+    <div class="box">
+
+  <h2>🎙️ AI Voice Detection</h2>
+
+  <input type="file" id="audioFile" accept="audio/*">
+
+  <button onclick="detectVoice()">Detect Voice</button>
+
+  <div id="voiceResult"></div>
+
+</div>
+
+<script>
+async function detectVoice(){
+
+  const file = document.getElementById("audioFile").files[0];
+
+  if(!file){
+    alert("Select audio first");
+    return;
+  }
+
+  const form = new FormData();
+  form.append("audio", file);
+
+  const res = await fetch("/detect-voice", {
+    method: "POST",
+    body: form
+  });
+
+  const data = await res.json();
+
+  let html = "<h4>Result:</h4>";
+
+  data.prediction.forEach(r=>{
+    html += `<p>${r.label}: ${(r.score*100).toFixed(2)}%</p>`;
+  });
+
+  document.getElementById("voiceResult").innerHTML = html;
+}
+</script>
 <div class="box">
     <h2>🔐 PhishGuard AI</h2>
     <p><i>Understand before you click.</i></p>
